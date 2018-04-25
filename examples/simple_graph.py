@@ -1,51 +1,76 @@
 # -*- coding: utf-8 -*-
 """
-==================================================
-Demo of the Louvain algorithm on the bow tie graph
-==================================================
+=============================================
+Demo of the Paris algorithm on a simple graph
+=============================================
 """
 print(__doc__)
 
-import networkx as nx
-import cylouvain
+from community import best_partition
+from pyparis.paris import *
+from pyparis.cluster_cut_slicer import *
+from pyparis.homogeneous_cut_slicer import *
+from pyparis.heterogeneous_cut_slicer import *
+from pyparis.distance_slicer import *
 
 # ############################################################################################
 # Generate the graph
 graph = nx.Graph()
-graph.add_nodes_from(['a', 'b', 'c', 'd', 'e'])
-graph.add_edges_from([('a', 'b'), ('a', 'c'), ('b', 'c'), ('c', 'd'), ('c', 'e'), ('d', 'e')])
+graph.add_nodes_from([0, 1, 2, 3, 4, 5])
+graph.add_weighted_edges_from([(0, 1, 1), (0, 2, 1), (1, 2, 1), (2, 3, 1),
+                      (3, 4, 1), (3, 5, 1), (4, 5, 1)])
 
 # ############################################################################################
-# Louvain on the NetworkX graph
+# Apply Paris on the graph
 print("Apply the algorithm to the NetworkX Graph object")
+dendrogram = paris(graph)
 
-partition = cylouvain.best_partition(graph)
-modularity = cylouvain.modularity(partition, graph)
+# ############################################################################################
+# Process dendrogram
+best_cut, best_score = best_cluster_cut(dendrogram)
+best_cluster = clustering_from_cluster_cut(dendrogram, best_cut)
 
-print("Output partition:")
-print(partition)
-print("Modularity %0.3f\n" % modularity)
+best_cut, best_score = best_homogeneous_cut(dendrogram)
+best_homogeneous_clustering = clustering_from_homogeneous_cut(dendrogram, best_cut)
+
+best_cut, best_score = best_heterogeneous_cut(dendrogram)
+best_heterogeneous_clustering = clustering_from_heterogeneous_cut(dendrogram, best_cut)
+
+best_dist, best_score = best_distance(dendrogram)
+best_louvain_clustering = best_partition(graph, resolution=best_dist)
 
 # #############################################################################
 # Plot result
 print("Plot the result\n")
 import matplotlib.pyplot as plt
 
-plt.figure()
-plt.axis('off')
+colors = ['b', 'g', 'r', 'c', 'm', 'y']
 pos = nx.fruchterman_reingold_layout(graph)
+
+plt.subplot(2, 2, 1)
+plt.title('Best cluster')
+plt.axis('off')
 nx.draw_networkx_edges(graph, pos)
-nx.draw_networkx_nodes(graph, pos, node_color=[partition[node] for node in graph])
+nodes = nx.draw_networkx_nodes(graph, pos, node_color='k')
+nx.draw_networkx_nodes(graph, pos, nodelist=best_cluster, node_color=colors[0])
+
+plt.subplot(2, 2, 2)
+plt.title('Best homogeneous clustering')
+plt.axis('off')
+nx.draw_networkx_edges(graph, pos)
+for l in range(min(len(colors), len(best_homogeneous_clustering))):
+    nx.draw_networkx_nodes(graph, pos, nodelist=best_homogeneous_clustering[l], node_color=colors[l])
+
+plt.subplot(2, 2, 3)
+plt.title('Best heterogeneous clustering')
+plt.axis('off')
+nx.draw_networkx_edges(graph, pos)
+for l in range(min(len(colors), len(best_heterogeneous_clustering))):
+    nx.draw_networkx_nodes(graph, pos, nodelist=best_heterogeneous_clustering[l], node_color=colors[l])
+
+plt.subplot(2, 2, 4)
+plt.title('Best distance')
+plt.axis('off')
+nx.draw_networkx_edges(graph, pos)
+nx.draw_networkx_nodes(graph, pos, node_color=[colors[best_louvain_clustering[node]] for node in graph])
 plt.show()
-
-# ############################################################################################
-# Louvain on the adjacency matrix
-print("Apply the algorithm to the adjacency matrix (SciPy CSR matrix)")
-
-adj_matrix = nx.adj_matrix(graph)
-partition = cylouvain.best_partition(adj_matrix)
-modularity = cylouvain.modularity(partition, adj_matrix)
-
-print("Output partition:")
-print(partition)
-print("Modularity %0.3f" % modularity)

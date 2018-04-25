@@ -1,5 +1,5 @@
 import unittest
-from paris.heterogeneous_cut_slicer import *
+from pyparis.heterogeneous_cut_slicer import *
 
 
 class TestHeterogeneoousCutSlicer(unittest.TestCase):

@@ -1,5 +1,5 @@
 import unittest
-from paris.distance_slicer import *
+from pyparis.distance_slicer import *
 
 
 class TestDistanceSlicer(unittest.TestCase):

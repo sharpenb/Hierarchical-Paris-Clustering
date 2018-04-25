@@ -6,7 +6,7 @@ def readme():
         return f.read()
 
 setup(name='pyparis',
-      version='0.0.0',
+      version='0.0.1',
       description='Multi-scale modularity based clustering algorithm',
       long_description=readme(),
       classifiers=['Topic :: System :: Clustering'],
@@ -15,9 +15,8 @@ setup(name='pyparis',
       author='Bertrand Charpentier',
       author_email='bercha@kth.se',
       license='Apache License 2.0',
-      packages=['paris'],
+      packages=['pyparis'],
       install_requires=['numpy', 'networkx'],
       test_suite='nose.collector',
-      tests_require=['nose'],
+      tests_require=['nose', 'matplotlib', 'python-louvain'],
       zip_safe=False)
-
