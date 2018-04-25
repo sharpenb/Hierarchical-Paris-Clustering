@@ -3,7 +3,7 @@ import numpy as np
 
 def clustering_from_cluster_cut(dendrogram, cut):
     """
-     Given a dendrogram and a cut level, compute the partitions corresponding to the cut level
+     Given a dendrogram and a cut level, compute the cluster corresponding to the cut level
 
      Parameters
      ----------
@@ -11,7 +11,8 @@ def clustering_from_cluster_cut(dendrogram, cut):
          Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
          nodes in the new cluster
      cut: int
-         The cut level at which the partition is extracted. All the clusters are extracted at this cut cut level
+         The cut level at which the cluster is extracted. The cut level can go from 0 to 2*n -2 with n the number of
+         nodes. The n first cut level are the sole nodes, the cut level n+t is the cluster created after t merges.
 
      Returns
      -------
@@ -23,6 +24,8 @@ def clustering_from_cluster_cut(dendrogram, cut):
      -
      """
     n_nodes = np.shape(dendrogram)[0] + 1
+    if cut < 0 or cut > 2 * n_nodes - 2:
+        raise ValueError
     if cut < n_nodes:
         return [cut]
     else:
@@ -45,7 +48,7 @@ class ClusterTree:
 
 def best_cluster_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
     """
-     Given a dendrogram and a scoring function, compute the cut level with the best average cluster score with respect
+     Given a dendrogram and a scoring function, compute the cut level with the best cluster score with respect
      to the scoring function
 
      Parameters
@@ -55,12 +58,17 @@ def best_cluster_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log
          nodes in the new cluster
      scoring: function
          Function that computes the score of a cluster thanks to its number of nodes (w), its creation distance (x) and
-         its merged distance
+         its merged distance (y)
 
      Returns
      -------
-     partition: int
-         Best cut level in the dendrogram. The best cut level is the cut level with the highest average cluster score
+     best_cut: int
+         Best cluster cut level in the dendrogram. The best cluster cut corresponds to the cluster with the highest
+         score. The cut level can go from 0 to 2*n -2 with n the number of nodes. The n first cut level are the sole
+         nodes, the cut level n+t is the cluster created after t merges.
+
+     best_cut_score: double
+         Best score obtained by the best cluster cut
 
      References
      ----------
@@ -69,7 +77,7 @@ def best_cluster_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log
     n_nodes = np.shape(dendrogram)[0] + 1
     best_cut = -1
     best_cut_score = 0.
-    cluster_trees = {t: ClusterTree(t, 0, 1, 0., [t]) for t in range(n_nodes)}
+    cluster_trees = {t: ClusterTree(t, 0, 1) for t in range(n_nodes)}
     for t in range(n_nodes - 1):
         i = int(dendrogram[t][0])
         j = int(dendrogram[t][1])
@@ -91,7 +99,7 @@ def best_cluster_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log
             right_tree.score = scoring(right_tree.size, new_distance, right_tree.distance)
         else:
             right_tree.score = 0.
-        if right_tree.score > right_tree.best_score:
+        if right_tree.score > best_cut_score:
             best_cut_score = right_tree.score
             best_cut = right_tree.cluster_label
 
@@ -105,8 +113,8 @@ def best_cluster_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log
 
 def ranking_cluster_cuts(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
     """
-     Given a dendrogram and a scoring function, compute the ranking of the cut level with the best average cluster score
-     with respect to the scoring function
+     Given a dendrogram and a scoring function, compute the ranking of the cluster cuts with the best cluster score with
+      respect to the scoring function
 
      Parameters
      ----------
@@ -115,12 +123,14 @@ def ranking_cluster_cuts(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np
          nodes in the new cluster
      scoring: function
          Function that computes the score of a cluster thanks to its number of nodes (w), its creation distance (x) and
-         its merged distance
+         its merged distance (y)
 
      Returns
      -------
      ranked_cuts: list of int
-         Ranking of the cut levels. The best cut level is the cut level with the highest average cluster score
+         Ranking of the cut levels. The best cluster cut corresponds to the cluster with the highest
+         score. The cut level can go from 0 to 2*n -2 with n the number of nodes. The n first cut level are the sole
+         nodes, the cut level n+t is the cluster created after t merges.
      ranked_cut_scores: list of double
          List of the cut level scores in the ranking order
 

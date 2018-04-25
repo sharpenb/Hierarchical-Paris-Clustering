@@ -3,14 +3,29 @@ import networkx as nx
 
 
 def paris(graph):
+    """
+     Given a graph, compute the paris hierarchy.
+
+     Parameters
+     ----------
+     dendrogram: networkx.graph
+         A graph with weighted edges.
+
+     Returns
+     -------
+     dendrogram: numpy.array
+         The paris hierachical clustering is represneted by the dendrogram. Each line of the dendrogram contains the
+         merged nodes, the distance between merged nodes and the number of nodes in the new cluster.
+
+     References
+     ----------
+     -
+     """
     graph_copy = graph.copy()
     nodes = list(graph_copy.nodes())
     n_nodes = len(nodes)
-
-    # index nodes from 0 to n - 1
     graph_copy = nx.convert_node_labels_to_integers(graph_copy)
 
-    # node weights
     w = {u: 0 for u in range(n_nodes)}
     wtot = 0
     for (u, v) in graph_copy.edges():
@@ -18,24 +33,15 @@ def paris(graph):
         w[u] += weight
         w[v] += weight
         wtot += 2 * weight
-
-    # cluster sizes
     s = {u: 1 for u in range(n_nodes)}
-
-    # connected components
     cc = []
-
-    # dendrogram as list of merges
-    D = []
-
-    # cluster index
+    dendrogram = []
     u = n_nodes
+
     while n_nodes > 0:
-        # nearest-neighbor chain
         chain = [list(graph_copy.nodes())[0]]
         while chain != []:
             a = chain.pop()
-            # nearest neighbor
             d_min = float("inf")
             b = -1
             neighbors_a = list(graph_copy.neighbors(a))
@@ -51,9 +57,7 @@ def paris(graph):
             if chain != []:
                 c = chain.pop()
                 if b == c:
-                    # merge a,b
-                    D.append([a, b, d, s[a] + s[b]])
-                    # update graph
+                    dendrogram.append([a, b, d, s[a] + s[b]])
                     graph_copy.add_node(u)
                     neighbors_a = list(graph_copy.neighbors(a))
                     neighbors_b = list(graph_copy.neighbors(b))
@@ -67,10 +71,8 @@ def paris(graph):
                     graph_copy.remove_node(a)
                     graph_copy.remove_node(b)
                     n_nodes -= 1
-                    # update weight and size
                     w[u] = w.pop(a) + w.pop(b)
                     s[u] = s.pop(a) + s.pop(b)
-                    # change cluster index
                     u += 1
                 else:
                     chain.append(c)
@@ -80,30 +82,47 @@ def paris(graph):
                 chain.append(a)
                 chain.append(b)
             else:
-                # remove the connected component
                 cc.append((a, s[a]))
                 graph_copy.remove_node(a)
                 w.pop(a)
                 s.pop(a)
                 n_nodes -= 1
 
-    # add connected components to the dendrogram
     a, s = cc.pop()
     for b, t in cc:
         s += t
-        D.append([a, b, float("inf"), s])
+        dendrogram.append([a, b, float("inf"), s])
         a = u
         u += 1
 
-    return reorder_dendrogram(np.array(D))
+    return reorder_dendrogram(np.array(dendrogram))
 
 
-def reorder_dendrogram(D):
-    n = np.shape(D)[0] + 1
+def reorder_dendrogram(dendrogram):
+    """
+     Given a graph, compute the paris hierarchy
+
+     Parameters
+     ----------
+     dendrogram: numpy.array
+         Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
+         nodes in the new cluster. The lines are not sorted with respect to increasing distances.
+
+     Returns
+     -------
+     dendrogram: numpy.array
+         Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
+         nodes in the new cluster. The lines are sorted with respect to increasing distances.
+
+     References
+     ----------
+     -
+     """
+    n = np.shape(dendrogram)[0] + 1
     order = np.zeros((2, n - 1), float)
     order[0] = range(n - 1)
-    order[1] = np.array(D)[:, 2]
+    order[1] = np.array(dendrogram)[:, 2]
     index = np.lexsort(order)
-    nindex = {i: i for i in range(n)}
-    nindex.update({n + index[t]: n + t for t in range(n - 1)})
-    return np.array([[nindex[int(D[t][0])], nindex[int(D[t][1])], D[t][2], D[t][3]] for t in range(n - 1)])[index, :]
+    n_index = {i: i for i in range(n)}
+    n_index.update({n + index[t]: n + t for t in range(n - 1)})
+    return np.array([[n_index[int(dendrogram[t][0])], n_index[int(dendrogram[t][1])], dendrogram[t][2], dendrogram[t][3]] for t in range(n - 1)])[index, :]

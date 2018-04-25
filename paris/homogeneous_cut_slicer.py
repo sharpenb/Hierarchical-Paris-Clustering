@@ -1,12 +1,34 @@
 import numpy as np
 
 
-def clustering_from_homogeneous_cut(D, cut):
-    n_nodes = np.shape(D)[0] + 1
+def clustering_from_homogeneous_cut(dendrogram, cut):
+    """
+     Given a dendrogram and a cut level, compute the homogeneous partition corresponding to the cut level.
+
+     Parameters
+     ----------
+     dendrogram: numpy.array
+         Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
+         nodes in the new cluster.
+     cut: int
+         The cut level at which the partition is extracted. All the clusters are extracted at this cut level.
+
+     Returns
+     -------
+     partition: list of list
+         A list of clusters, where each cluster is a list of nodes.
+
+     References
+     ----------
+     -
+     """
+    n_nodes = np.shape(dendrogram)[0] + 1
+    if cut < 0 or cut > n_nodes - 1:
+        raise ValueError
     cluster = {i: [i] for i in range(n_nodes)}
     for t in range(cut):
-        i = int(D[t][0])
-        j = int(D[t][1])
+        i = int(dendrogram[t][0])
+        j = int(dendrogram[t][1])
         cluster[n_nodes + t] = cluster.pop(i) + cluster.pop(j)
     clusters = [cluster[c] for c in cluster]
     return clusters
@@ -23,18 +45,44 @@ class ClusterTree:
         self.right = None
 
 
-def best_homogeneous_cut(D, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
-    n_nodes = np.shape(D)[0] + 1
+def best_homogeneous_cut(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
+    """
+     Given a dendrogram and a scoring function, compute the homogeneous cut level with the best average cluster score
+     with respect to the scoring function.
 
-    cluster_trees = {t: ClusterTree(t, 1., 1, 0.) for t in range(n_nodes)}
+     Parameters
+     ----------
+     dendrogram: numpy.array
+         Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
+         nodes in the new cluster.
+     scoring: function
+         Function that computes the score of a cluster thanks to its number of nodes (w), its creation distance (x) and
+         its merged distance (y).
+
+     Returns
+     -------
+     best_cut: int
+         Best homogeneous cut in the dendrogram. The best homogeneous cut is the cut level with the highest average
+         cluster score. The cut level can go from 0 to n - 1 with n the number of nodes. The cut t is the partition
+         created after t merges.
+
+     best_cut_score: double
+         Best score obtained by the best homogeneous cut level
+
+     References
+     ----------
+     -
+     """
+    n_nodes = np.shape(dendrogram)[0] + 1
+    cluster_trees = {t: ClusterTree(t, 0., 1, 0.) for t in range(n_nodes)}
     for t in range(n_nodes - 1):
-        i = int(D[t][0])
-        j = int(D[t][1])
+        i = int(dendrogram[t][0])
+        j = int(dendrogram[t][1])
         left_tree = cluster_trees[i]
         right_tree = cluster_trees[j]
 
-        new_distance = D[t, 2]
-        new_size = D[t, 3]
+        new_distance = dendrogram[t, 2]
+        new_size = dendrogram[t, 3]
 
         if left_tree.distance > 0.:
             left_tree.score = scoring(left_tree.size, new_distance, left_tree.distance)
@@ -63,18 +111,43 @@ def best_homogeneous_cut(D, scoring=lambda w, x, y: w * (np.log(x) - np.log(y)))
     return best_cut, best_score
 
 
-def ranking_homogeneous_cuts(D, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
-    n_nodes = np.shape(D)[0] + 1
+def ranking_homogeneous_cuts(dendrogram, scoring=lambda w, x, y: w * (np.log(x) - np.log(y))):
+    """
+     Given a dendrogram and a scoring function, compute the ranking of the homogeneous cut level with the best average
+     cluster score with respect to the scoring function.
 
-    cluster_trees = {t: ClusterTree(t, 1., 1, 0.) for t in range(n_nodes)}
+     Parameters
+     ----------
+     dendrogram: numpy.array
+         Each line of the dendrogram contains the merged nodes, the distance between merged nodes and the number of
+         nodes in the new cluster.
+     scoring: function
+         Function that computes the score of a cluster thanks to its number of nodes (w), its creation distance (x) and
+         its merged distance.
+
+     Returns
+     -------
+     ranked_cuts: list of int
+         Ranking of the homogeneous cut levels. The best cut level is the cut level with the highest average cluster
+         score. The cut level can go from 0 to n - 1 with n the number of nodes. The cut t is the partition created
+         after t merges.
+     ranked_cut_scores: list of double
+         List of the cut level scores in the ranking order.
+
+     References
+     ----------
+     -
+     """
+    n_nodes = np.shape(dendrogram)[0] + 1
+    cluster_trees = {t: ClusterTree(t, 0., 1, 0.) for t in range(n_nodes)}
     for t in range(n_nodes - 1):
-        i = int(D[t][0])
-        j = int(D[t][1])
+        i = int(dendrogram[t][0])
+        j = int(dendrogram[t][1])
         left_tree = cluster_trees[i]
         right_tree = cluster_trees[j]
 
-        new_distance = D[t, 2]
-        new_size = D[t, 3]
+        new_distance = dendrogram[t, 2]
+        new_size = dendrogram[t, 3]
 
         if left_tree.distance > 0.:
             left_tree.score = scoring(left_tree.size, new_distance, left_tree.distance)
@@ -102,34 +175,3 @@ def ranking_homogeneous_cuts(D, scoring=lambda w, x, y: w * (np.log(x) - np.log(
     ranked_cut_scores = sorted(list(cut_scores.values()), reverse=True)
 
     return ranked_cuts, ranked_cut_scores
-
-
-def naive_best_homogeneous_cut(D, scoring=lambda x, y: np.log(x) - np.log(y)):
-    score = scoring(D[1:, 2], D[:-1, 2])
-    best_cut = np.argmax(score) + 1
-    best_score = max(score)
-    return best_cut, best_score
-
-
-def naive_ranking_homogeneous_cuts(D, scoring=lambda x, y: np.log(x) - np.log(y)):
-    scores = scoring(D[1:, 2], D[:-1, 2])
-    ranked_cuts = np.argsort(-scores) + 1
-    ranked_scores = sorted(scores, reverse=True)
-    return ranked_cuts, ranked_scores
-
-
-def filter_homogeneous_ranking(ranking, scores, D, threshold=.1, scaling=lambda x: np.log(x)):
-    s_index = np.concatenate(([0.], scaling(D[:, 2]) - scaling(D[0, 2])))
-    filtered_ranking = []
-    filtered_scores = []
-    for i, t in enumerate(ranking):
-        to_exclude = False
-        for s in filtered_ranking:
-            if abs(s_index[s] - s_index[t]) < threshold * s_index[s]:
-                to_exclude = True
-                break
-        if not to_exclude:
-            filtered_ranking.append(t)
-            filtered_scores.append(scores[i])
-
-    return filtered_ranking, filtered_scores
