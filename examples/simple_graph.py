@@ -7,11 +7,11 @@ Demo of the Paris algorithm on a simple graph
 print(__doc__)
 
 from community import best_partition
-from pyparis.paris import *
-from pyparis.cluster_cut_slicer import *
-from pyparis.homogeneous_cut_slicer import *
-from pyparis.heterogeneous_cut_slicer import *
-from pyparis.distance_slicer import *
+from python_paris.paris import *
+from python_paris.cluster_cut_slicer import *
+from python_paris.homogeneous_cut_slicer import *
+from python_paris.heterogeneous_cut_slicer import *
+from python_paris.distance_slicer import *
 
 # ############################################################################################
 # Generate the graph

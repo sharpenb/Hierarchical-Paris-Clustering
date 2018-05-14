@@ -1,4 +1,4 @@
-pyparis: Hierarchical graph clustering algorithm (paris) and dendrogram processing
+python-paris: Hierarchical graph clustering algorithm (paris) and dendrogram processing
 =========================
 
 paris is a Python module that provides an implementation of the hierarchical clustering algorithm for graphs, paris.
@@ -9,7 +9,7 @@ Installation
 
 Install the latest version of cylouvain using ``pip`` ::
 
-    $ pip install pyparis
+    $ pip install python_paris
 
 Dependencies
 ------------
@@ -33,7 +33,7 @@ Build a simple graph with NetworkX::
 
 Compute a clustering hierarchy of the nodes using paris::
 
-    >>> from pyparis import paris
+    >>> from python_paris import paris
     >>> dendrogram = paris(graph)
 
 Compute the best clusters, clusterings and distances::

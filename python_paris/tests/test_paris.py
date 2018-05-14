@@ -1,6 +1,6 @@
 import unittest
 import networkx
-from pyparis.paris import *
+from python_paris.paris import *
 
 
 class TestParis(unittest.TestCase):

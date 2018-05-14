@@ -1,5 +1,5 @@
 import unittest
-from pyparis.cluster_cut_slicer import *
+from python_paris.cluster_cut_slicer import *
 
 
 class TestClusterSlicer(unittest.TestCase):
