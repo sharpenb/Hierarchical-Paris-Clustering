@@ -33,7 +33,7 @@ Build a simple graph with NetworkX::
 
 Compute a clustering hierarchy of the nodes using paris::
 
-    >>> from paris import paris
+    >>> from pyparis import paris
     >>> dendrogram = paris(graph)
 
 Compute the best clusters, clusterings and distances::

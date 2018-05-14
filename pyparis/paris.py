@@ -25,6 +25,9 @@ def paris(graph):
     nodes = list(graph_copy.nodes())
     n_nodes = len(nodes)
     graph_copy = nx.convert_node_labels_to_integers(graph_copy)
+    if nx.get_edge_attributes(graph_copy, 'weight') == {}:
+        for u, v in graph_copy.edges():
+            graph_copy.add_edge(u, v, weight=1)
 
     w = {u: 0 for u in range(n_nodes)}
     wtot = 0
