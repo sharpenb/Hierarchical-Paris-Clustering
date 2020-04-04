@@ -1,8 +1,17 @@
 python-paris: Hierarchical graph clustering algorithm (paris) and dendrogram processing
 =========================
 
-paris is a Python module that provides an implementation of the hierarchical clustering algorithm for graphs, paris.
-It provides four algorithms able to process dendrograms in order to extract best clusters, clusterings or distances.
+The paris package is a Python module that provides an implementation of the hierarchical clustering algorithm for graphs, paris, from the paper:
+
+[Hierarchical Graph Clustering using Node Pair Sampling](https://www.mlgworkshop.org/2018/papers/MLG2018_paper_4.pdf)<br>
+Thomas Bonald , Bertrand Charpentier, Alexis Galland, Alexandre Hollocou<br>
+Mining and Learning with Graphs (MLG - KDD Workshop), 2018
+
+Additonally, it provides four algorithms able to process dendrograms in order to extract best clusters, clusterings or distances. These algorithms are described in the paper:
+
+[Multi-scale Clustering in Graphs using Modularity](http://www.diva-portal.org/smash/get/diva2:1292782/FULLTEXT01.pdf)<br>
+Bertrand Charpentier<br>
+KTH Publicaiton Library (DiVA) 2019
 
 Installation
 ------------
