@@ -57,4 +57,4 @@ License
 
 Released under the Apache License 2.0 licence::
 
-   Copyright (C) 2018 Bertrand Charpentier <bercha@kth.se>
+   Copyright (C) 2018 Bertrand Charpentier <bertrand.charpentier@in.tum.de> <bercha@kth.se>
