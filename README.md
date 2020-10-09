@@ -55,7 +55,23 @@ Compute the best clusters, clusterings and distances::
 Cite
 ----
 
-Please cite my thesis if you use the algorithms or this code in your own work:
+Please cite our paper and my thesis if you use the algorithms or this code in your own work:
+
+```
+@inproceedings{paris_clustering,
+  TITLE = {{Hierarchical Graph Clustering using Node Pair Sampling}},
+  AUTHOR = {Bonald, Thomas and Charpentier, Bertrand and Galland, Alexis and Hollocou, Alexandre},
+  URL = {https://hal.archives-ouvertes.fr/hal-01887669},
+  BOOKTITLE = {{MLG 2018 - 14th International Workshop on Mining and Learning with Graphs}},
+  ADDRESS = {London, United Kingdom},
+  SERIES = {MLG 2018 - 14th International Workshop on Mining and Learning with Graphs},
+  YEAR = {2018},
+  MONTH = Aug,
+  PDF = {https://hal.archives-ouvertes.fr/hal-01887669/file/arxiv.pdf},
+  HAL_ID = {hal-01887669},
+  HAL_VERSION = {v1},
+}
+```
 
 ```
 @phdthesis{Charpentier_2019, series={TRITA-EECS-EX}, 
